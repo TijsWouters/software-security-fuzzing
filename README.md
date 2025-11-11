@@ -80,6 +80,26 @@ after building in lib3mf directory you should see lib3mf.so
 mv lib3mf.so.2.4.1.0 lib3mf_hf.so
 ```
 
+2. c) Installing and using zuff
+* Install zzuf: `sudo apt install zzuf`
+zzuf takes in the target program and input and thats basically all. So no specific compilation is required for lib3mf.
+
+* Example:
+
+    ```
+    zzuf cat input.txt
+    ```
+    This command performs a 1 time fuzz for input.txt given to the `cat` command.
+
+* zzuf is reproducable, so using `zuff` with the same settings and input gives always the same result.
+
+* Some useful parameters:
+    * The parameter `-r` specifies the fuzz rate (default 0.004 (0.4%), meaning 0.4% of othe bits is fuzzed). Example usage `-r 0.05` to specify a fuzz rate of 5%.
+    * The parameter `-s` is used to change the random seed (default 0).
+    * Parameters `-r` and `-s` are rangeable: `-s 0:5`. It executes the seeds directly after each other.
+    * Adding `-v` gives more verbosity for the runs
+* Possible idea: take an input model file and range zzuf over it with a bunch of mutants
+
 3. Testing whether linking with libary works 
 * make a `test.cpp` file and try compiling
 ```
