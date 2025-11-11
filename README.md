@@ -22,16 +22,17 @@ afl-clang-fast --version
 
 make clean
 
-# tell cmake to use AFL++ compiler wrappers and low optimization for better instrumentation
+rm -rf build
+
 export CC=afl-clang-fast
 export CXX=afl-clang-fast++
 export CFLAGS="-g -O1 -fno-omit-frame-pointer"
 export CXXFLAGS="-g -O1 -fno-omit-frame-pointer"
 
-cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+cmake --build build -j$(nproc)
 
-cd ./build
-make -j$(nproc)
+mv ./build/lib3mf.so.2.4.1.0 ./lib3mf_afl.so
 ```
 
 after building in lib3mf directory you should see lib3mf.so
@@ -62,16 +63,17 @@ sudo make install
 
 make clean
 
-# tell cmake to use AFL++ compiler wrappers and low optimization for better instrumentation
-export CC=hfuzz-clang
-export CXX=hfuzz-clang++
+rm -rf build
+
+export CC=../../honggfuzz/hfuzz_cc/hfuzz-clang
+export CXX=../../honggfuzz/hfuzz_cc/hfuzz-clang++
 export CFLAGS="-g -O1 -fno-omit-frame-pointer"
 export CXXFLAGS="-g -O1 -fno-omit-frame-pointer"
 
-cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+cmake --build build -j$(nproc)
 
-cd ./build
-make -j$(nproc)
+mv ./build/lib3mf.so.2.4.1.0 ./lib3mf_hf.so
 ```
 
 after building in lib3mf directory you should see lib3mf.so
