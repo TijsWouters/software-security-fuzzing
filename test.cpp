@@ -27,12 +27,10 @@ int main(int argc, char **argv)
             return 2;
         }
 
-        // Create a 3MF reader and parse the file.
         Lib3MF::PReader reader = model->QueryReader("3mf"); // creates a reader for a specific file type
         reader->SetStrictModeActive(false);                 // be permissive so fuzz data goes deeper
         reader->ReadFromFile(path);                         // read model from file
 
-        // Print warnings (if any)
         Lib3MF_uint32 warnCount = reader->GetWarningCount();
         for (Lib3MF_uint32 i = 0; i < warnCount; ++i)
         {
