@@ -5,5 +5,4 @@ test
 AFLplusplus
 test_afl
 test_hf
-Makefile
 TODO.md

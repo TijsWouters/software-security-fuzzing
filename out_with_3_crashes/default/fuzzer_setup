@@ -1,7 +1,0 @@
-# environment variables:
-AFL_CUSTOM_INFO_PROGRAM=./test
-AFL_CUSTOM_INFO_PROGRAM_ARGV=@@ -p fast
-AFL_CUSTOM_INFO_OUT=out/default
-AFL_USE_ASAN=1
-# command line:
-'afl-fuzz' '-i' 'in/' '-o' 'out' '--' './test' '@@' '-p' 'fast'

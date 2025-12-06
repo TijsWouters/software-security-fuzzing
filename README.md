@@ -20,25 +20,19 @@ afl-clang-fast --version
 ```
 #!/bin/bash
 
-make clean
+#make clean
 
 rm -rf build
 
 export CC=afl-clang-fast
 export CXX=afl-clang-fast++
-export CFLAGS="-g -O1 -fno-omit-frame-pointer"
-export CXXFLAGS="-g -O1 -fno-omit-frame-pointer"
+export CFLAGS="-g -O1 -fno-omit-frame-pointer" #-fsanitize=address
+export CXXFLAGS="-g -O1 -fno-omit-frame-pointer" #-fsanitize=addressr"
+unset AFL_USE_ASAN
+#export AFL_USE_ASAN=1
 
-cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF -DLIB3MF_TESTS=OFF
 cmake --build build -j$(nproc)
-
-mv ./build/lib3mf.so.2.4.1.0 ./lib3mf_afl.so
-```
-
-after building in lib3mf directory you should see lib3mf.so
-* rename it:
-```
-mv lib3mf.so.2.4.1.0 lib3mf_afl.so
 ```
 
 2. b) Building with honggfuzz
@@ -61,25 +55,17 @@ sudo make install
 ```
 #!/bin/bash
 
-make clean
+#make clean
 
 rm -rf build
 
-export CC=../../honggfuzz/hfuzz_cc/hfuzz-clang
-export CXX=../../honggfuzz/hfuzz_cc/hfuzz-clang++
-export CFLAGS="-g -O1 -fno-omit-frame-pointer"
-export CXXFLAGS="-g -O1 -fno-omit-frame-pointer"
+export CC=hfuzz-clang
+export CXX=hfuzz-clang++
+export CFLAGS="-g -O1 -fno-omit-frame-pointer #-fsanitize=address"
+export CXXFLAGS="-g -O1 -fno-omit-frame-pointer #-fsanitize=address"
 
-cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DLIB3MF_TESTS=OFF
 cmake --build build -j$(nproc)
-
-mv ./build/lib3mf.so.2.4.1.0 ./lib3mf_hf.so
-```
-
-after building in lib3mf directory you should see lib3mf.so
-* rename it:
-```
-mv lib3mf.so.2.4.1.0 lib3mf_hf.so
 ```
 
 2. c) Installing and using zuff
@@ -100,7 +86,21 @@ zzuf takes in the target program and input and thats basically all. So no specif
     * The parameter `-s` is used to change the random seed (default 0).
     * Parameters `-r` and `-s` are rangeable: `-s 0:5`. It executes the seeds directly after each other.
     * Adding `-v` gives more verbosity for the runs
-* Possible idea: take an input model file and range zzuf over it with a bunch of mutants
+
+* compiling put this in a bash script and run it in lib3mf directory
+```
+#!/bin/bash
+
+rm -rf build
+
+export CC=clang
+export CXX=clang
+export CFLAGS="-g -O1 -fno-omit-frame-pointer #-fsanitize=address"
+export CXXFLAGS="-g -O1 -fno-omit-frame-pointer #-fsanitize=address"
+
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+cmake --build build -j$(nproc)
+```
 
 3. Testing whether linking with libary works 
 * make a `test.cpp` file and try compiling
@@ -163,20 +163,20 @@ hfuzz-clang++ -g -O1 -fno-omit-frame-pointer \
 ./test
 ```
 
-4. a) Fuzzing lib3mf with afl (TODO!)
-we need to try afl++, zzuf, HonggFuzz
-sanitizers, ASan, possibly MSan, UBSan, Valgrind
-change program, what to fuzz.
-make `in` and `out` directories.
+4. a) Fuzzing lib3mf with afl
+in general we do this, however depending on whether we run with asan or not the binary `test_afl` and outdir `out_afl` have different names
 ```
-afl-fuzz -i in/ -o out -- ./test @@
+afl-fuzz -i in/ -o out_afl -- ./test_afl @@
 ```
 
-possible things to do:
+4. b) Fuzzing lib3mf with honggfuzz
+in general we do this, however depending on whether we run with asan or not the binary `test_hf` and outdir `out_hf` have different names
+```
+honggfuzz -i in --output out_hf --timeout 10 -P --threads 1 -- ./test_hf ___FILE___
+```
 
-- investigate (and fix?) any bugs you found;
-- check bugs found against known CVEs;
-- introduce bugs and see if fuzzers can find these;
-- if you do not find bugs: test older releases; - try different settings of the tools or different initial seeds;
-
-4. b) Fuzzing lib3mf with honggfuzz (TODO!)
+4. c) Fuzzing lib3mf with zuff
+```
+./zuff.sh
+./zuff_asan.sh
+```
